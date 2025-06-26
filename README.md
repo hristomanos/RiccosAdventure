@@ -1,4 +1,4 @@
-# RiccosAdventure
+# Ricco's Adventure
 Ricco's Adventure is a small, fun little 2D pixel art game with my bunny pet (Ricco) as the protagonist.
 
 
