@@ -4,26 +4,20 @@ using UnityEngine;
 
 public class Move : MonoBehaviour
 {
-
     [Range(0f,10f)]
     [SerializeField] int speed = 1;
-    Rigidbody2D m_rigidBody2D;
 
-    SpriteRenderer m_spriteRenderer;
+    Rigidbody2D rb;
+    SpriteRenderer spriteRenderer;
+    Animator animator;
 
-
-    Animator m_Animator;
-
-
-    // Start is called before the first frame update
     void Start()
     {
-        m_rigidBody2D = GetComponent<Rigidbody2D>();
-        m_spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-        m_Animator = GetComponentInChildren<Animator>();
+        rb = GetComponent<Rigidbody2D>();
+        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        animator = GetComponentInChildren<Animator>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         float directionX = Input.GetAxisRaw("Horizontal");
@@ -32,31 +26,24 @@ public class Move : MonoBehaviour
 
         FlipSpriteX(directionX);
 
-        m_Animator.SetFloat("Speed",Mathf.Abs(directionX));
-            
-        
+        animator.SetFloat("Speed",Mathf.Abs(directionX));
     }
-
-
-
-
+    
     void MoveCharacter(float directionX)
     {
-        m_rigidBody2D.velocity = new Vector2(directionX * speed, m_rigidBody2D.velocity.y);
+        rb.velocity = new Vector2(directionX * speed, rb.velocity.y);
     }
 
     void FlipSpriteX(float directionX)
     {
         if (directionX < 0)
         {
-            m_spriteRenderer.flipX = true;
+            spriteRenderer.flipX = true;
         }
 
         if (directionX > 0)
         {
-            m_spriteRenderer.flipX = false;
+            spriteRenderer.flipX = false;
         }
-
     }
-
 }
