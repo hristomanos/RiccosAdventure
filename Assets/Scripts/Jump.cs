@@ -1,42 +1,59 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 public class Jump : MonoBehaviour
 {
-    Rigidbody2D rb;
-    Animator animator;
-    [SerializeField] SpriteRenderer spriteRenderer;
-    [SerializeField] Collider2D colliderBox;
+    [Header("Visual")]
+    [SerializeField] private SpriteRenderer spriteRenderer;
 
-    [SerializeField] LayerMask groundLayerMask; 
+    [Header("Physics")]
+    [SerializeField] private Collider2D colliderBox;
+    [SerializeField] private LayerMask groundLayerMask; 
 
     [Range(300,600)]
-    [SerializeField] int jumpForce = 450;
+    [SerializeField] private int jumpForce = 450;
 
-    void Start()
+    private Rigidbody2D rb2D;
+    private Animator animator;
+
+    private bool jumpButtonPressed;
+
+    private void Start()
     {
-        
-        rb = GetComponent<Rigidbody2D>();
+        rb2D = GetComponent<Rigidbody2D>();
         animator = GetComponentInChildren<Animator>();
     }
 
-    void Update()
+    private void Update()
     {
         JumpCharacter();
     }
 
-    void JumpCharacter()
+    private void JumpCharacter()
     {
         if(Input.GetButtonDown("Jump") && IsAllowedToJump())
         {
-            rb.AddForce(jumpForce * Vector2.up);
+            jumpButtonPressed = true;
         }
     }
 
-    bool IsAllowedToJump()
+    private void FixedUpdate()
+    {
+        if (jumpButtonPressed)
+        {
+            rb2D.AddForce(jumpForce * Vector2.up);
+            ResetLandingAnimationFlag();
+            jumpButtonPressed = false;
+        }
+
+        animator.SetFloat("VelocityY", rb2D.velocity.y);
+
+        if(IsAllowedToJump() && rb2D.velocity.y < 0)
+        {
+            PlayLandingAnimation();
+        }
+    }
+
+    private bool IsAllowedToJump()
     {
         var rightBottom = new Vector2(transform.position.x + colliderBox.bounds.extents.x,
             transform.position.y - colliderBox.bounds.extents.y);
@@ -54,7 +71,7 @@ public class Jump : MonoBehaviour
 
     private bool CheckIfGroundIsHit(Vector2 rayOriginPosition)
     {
-        if ( Physics2D.Raycast(rayOriginPosition, Vector2.down, 0.1f, groundLayerMask) )
+        if(Physics2D.Raycast(rayOriginPosition, Vector2.down, 0.1f, groundLayerMask))
         {
             return true;
         }
@@ -62,24 +79,18 @@ public class Jump : MonoBehaviour
         return false;
     }
 
-    private void OnDrawGizmos()
+    private void PlayLandingAnimation()
     {
-        var rightBottom = new Vector2(transform.position.x + colliderBox.bounds.extents.x,
-            transform.position.y - colliderBox.bounds.extents.y);
+        SetIsOnGroundAnimatorFlag(true);
+    }
 
-        var leftBottom = new Vector2(transform.position.x - colliderBox.bounds.extents.x,
-            transform.position.y - colliderBox.bounds.extents.y);
+    private void ResetLandingAnimationFlag()
+    {
+        SetIsOnGroundAnimatorFlag(false);
+    }
 
-        var centerBottom = new Vector2(transform.position.x,
-            transform.position.y - colliderBox.bounds.extents.y);
-
-        var length = 0.1f;
-
-
-        Gizmos.color = Color.red;
-        
-        Gizmos.DrawLine(rightBottom, new Vector2(rightBottom.x, rightBottom.y - length));
-        Gizmos.DrawLine(leftBottom, new Vector2(leftBottom.x, leftBottom.y - length));
-        Gizmos.DrawLine(centerBottom, new Vector2(centerBottom.x, centerBottom.y - length));
+    private void SetIsOnGroundAnimatorFlag(bool isOnGround)
+    {
+        animator.SetBool("IsOnGround", isOnGround);
     }
 }
